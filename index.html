@@ -4,10 +4,565 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FW-OCS</title>
-  <link rel="stylesheet" href="form.css" />
+  <meta name="description" content="OCD Complement Screen. Initials only. Results go to the ReadyWell office." />
+  <meta property="og:title" content="FW-OCS" />
+  <meta property="og:description" content="OCD Complement Screen" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://www.yuriybortnik.com/og.jpg" id="ogImage" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://www.yuriybortnik.com/og.jpg" id="twImage" />
+  <meta property="x:game:image" content="https://www.yuriybortnik.com/x-banner.jpg" id="xBanner" />
+  <script>
+    (function () {
+      var host = location.host;
+      if (!host || host === "localhost" || host.indexOf("127.0.0.1") === 0) return;
+      var origin = location.protocol + "//" + host;
+      var og = origin + "/og.jpg";
+      var banner = origin + "/x-banner.jpg";
+      var ogEl = document.getElementById("ogImage");
+      var twEl = document.getElementById("twImage");
+      var xbEl = document.getElementById("xBanner");
+      if (ogEl) ogEl.setAttribute("content", og);
+      if (twEl) twEl.setAttribute("content", og);
+      if (xbEl) xbEl.setAttribute("content", banner);
+    })();
+  </script>
+  <style>
+    :root {
+      --navy: #0b1f3a;
+      --navy-2: #071528;
+      --teal: #c9a227;
+      --bg: #f4f7fa;
+      --card: #ffffff;
+      --ink: #1c2833;
+      --muted: #5d6d7e;
+      --line: #d5d8dc;
+      --gold-bg: #fcf3cf;
+      --gold: #7d6608;
+      --red-bg: #fadbd8;
+      --red: #922b21;
+      --ok-bg: #d5f5e3;
+      --ok: #196f3d;
+    }
+    * { box-sizing: border-box; }
+    html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: .5rem .7rem;
+      border-bottom: 3px solid var(--teal);
+    }
+    .brand {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+    }
+    .brand img {
+      width: 44px;
+      height: 50px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    header h1 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+    header .sub { margin: .05rem 0 0; font-size: .75rem; opacity: .9; font-style: italic; }
+    header .clinic { margin: 0; font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: #e8c56b; }
+    main { max-width: 640px; margin: 0 auto; padding: .55rem .55rem 1rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .55rem .65rem .65rem;
+      margin: 0 0 .55rem;
+    }
+    .note {
+      background: #d6eaf8;
+      border-radius: 6px;
+      padding: .45rem .55rem;
+      font-size: .78rem;
+      color: var(--navy-2);
+    }
+    h2 {
+      margin: 0 0 .4rem;
+      font-size: .88rem;
+      background: var(--navy);
+      color: #fff;
+      padding: .28rem .5rem;
+      border-radius: 5px;
+    }
+    label.field { display: block; font-size: .75rem; color: var(--muted); margin: .3rem 0 .08rem; }
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+      width: 100%;
+      padding: .35rem .45rem;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      font: inherit;
+      font-size: .88rem;
+    }
+    textarea { min-height: 52px; resize: vertical; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+    .item { padding: .4rem 0; border-bottom: 1px solid var(--line); }
+    .item:last-child { border-bottom: 0; }
+    .item p { margin: 0 0 .28rem; font-size: .82rem; }
+    .item .code { color: var(--navy); font-weight: 700; }
+    .scale {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .22rem;
+    }
+    .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .08rem;
+      font-size: .62rem;
+      color: var(--muted);
+      text-align: center;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: .22rem .08rem;
+      cursor: pointer;
+      min-height: 36px;
+      justify-content: center;
+    }
+    .scale small { display: block; font-size: .52rem; line-height: 1.1; font-weight: 400; }
+    .scale input { accent-color: var(--navy); transform: scale(.9); }
+    .scale label:has(input:checked) {
+      background: #d6eaf8;
+      border-color: var(--navy);
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .yn { display: flex; gap: .4rem; }
+    .yn label {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: .22rem .55rem;
+      cursor: pointer;
+      font-size: .8rem;
+    }
+    .yn label:has(input:checked) {
+      background: #d6eaf8;
+      border-color: var(--navy);
+      font-weight: 700;
+    }
+    .hint { font-size: .72rem; color: var(--muted); font-style: italic; margin: 0 0 .4rem; }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 0;
+      border-radius: 6px;
+      padding: .45rem .7rem;
+      background: var(--navy);
+      color: #fff;
+      font-size: .85rem;
+    }
+    button.secondary { background: #5d6d7e; }
+    .actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .45rem; }
+    #summaryBox {
+      width: 100%;
+      min-height: 140px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: .75rem;
+      line-height: 1.35;
+      margin: .4rem 0;
+    }
+    #copyStatus { font-size: .75rem; color: var(--ok); min-height: 1em; }
+    #results { display: none; }
+    #results.show { display: block; }
+    .score-row { display: flex; justify-content: space-between; gap: .6rem; padding: .2rem 0; border-bottom: 1px solid var(--line); font-size: .8rem; }
+    .pill { display: inline-block; border-radius: 999px; padding: .05rem .4rem; font-size: .7rem; font-weight: 700; }
+    .pos { background: var(--red-bg); color: var(--red); }
+    .neg { background: var(--ok-bg); color: var(--ok); }
+    .flag { background: var(--gold-bg); color: var(--gold); padding: .25rem .4rem; border-radius: 5px; margin: .18rem 0; font-size: .75rem; }
+    footer { text-align: center; color: var(--muted); font-size: .68rem; padding: .6rem; }
+    .actions.sticky {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg);
+      padding: .4rem .15rem .55rem;
+      margin: .35rem -0.15rem 0;
+      border-top: 1px solid var(--line);
+      z-index: 20;
+    }
+    @media (max-width: 640px) {
+      html { font-size: 13.5px; }
+      body { line-height: 1.28; }
+      header { padding: .35rem .5rem; }
+      .brand { gap: .4rem; }
+      .brand img { width: 32px; height: 36px; }
+      header h1 { font-size: .95rem; }
+      header .sub { font-size: .68rem; }
+      header .clinic { font-size: .55rem; letter-spacing: .06em; }
+      main { padding: .35rem .4rem 4.2rem; }
+      .card { padding: .4rem .45rem .45rem; margin: 0 0 .35rem; border-radius: 6px; }
+      .note { padding: .35rem .4rem; font-size: .72rem; }
+      h2 { font-size: .8rem; padding: .2rem .4rem; margin: 0 0 .28rem; }
+      .hint { font-size: .66rem; margin: 0 0 .28rem; }
+      .item { padding: .28rem 0; }
+      .item p { font-size: .78rem; margin: 0 0 .18rem; }
+      .scale { gap: .15rem; }
+      .scale label { min-height: 32px; padding: .12rem .04rem; font-size: .58rem; border-radius: 5px; }
+      .scale small { display: none; }
+      .yn label { padding: .18rem .45rem; font-size: .75rem; }
+      .grid-2 { grid-template-columns: 1fr 1fr; gap: .3rem; }
+      textarea { min-height: 44px; }
+      footer { padding: .4rem; font-size: .62rem; }
+      .actions { position: sticky; bottom: 0; background: var(--bg); padding: .4rem 0 .55rem; z-index: 20; }
+    }
+    @media (max-width: 400px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+</style>
 </head>
 <body>
-  <p>Loading form…</p>
-  <script src="form.js"></script>
+  <header>
+    <div class="brand">
+      <img src="yb-crest.svg" alt="YB crest" />
+      <div>
+        <div class="clinic">ReadyWell · Yuriy Bortnik, PMHNP</div>
+        <h1>FW-OCS</h1>
+        <p class="sub">OCD Complement Screen · not a diagnosis</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="card note">
+      Past <strong>month</strong> unless a question says otherwise. Themes, mental rituals, avoidance, family involvement.
+    </div>
+
+    <form id="ocs" autocomplete="on">
+      <div class="card">
+        <h2>About you</h2>
+        <p class="hint">Use initials only — not your full name. Example: Y.B. Add the visit date if you have an appointment.</p>
+        <div class="grid-2">
+          <div>
+            <label class="field" for="name">Initials only</label>
+            <input id="name" name="name" type="text" maxlength="12" placeholder="e.g. Y.B." required />
+          </div>
+          <div>
+            <label class="field" for="date">Today’s date</label>
+            <input id="date" name="date" type="date" />
+          </div>
+          <div>
+            <label class="field" for="age">Age (optional)</label>
+            <input id="age" name="age" type="number" min="5" max="120" />
+          </div>
+          <div>
+            <label class="field" for="visit">Next visit date</label>
+            <input id="visit" name="visit" type="date" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Part A · Distress gate</h2>
+        <p class="hint">How much has each of these bothered you in the past month? 0 = not at all, 4 = extreme.</p>
+        <div id="partA"></div>
+      </div>
+
+      <div class="card">
+        <h2>Part B · What Y-BOCS often under-captures</h2>
+        <p class="hint">Yes or no for the past month.</p>
+        <div id="partB"></div>
+      </div>
+
+      <div class="card">
+        <h2>Part C · Severity lite (past week)</h2>
+        <p class="hint">Think of all the thoughts and rituals you marked above.</p>
+        <div id="partC"></div>
+        <label class="field" for="hours">Exact estimate — hours on a typical day (DSM uses more than 1 hour/day)</label>
+        <input id="hours" name="hours" type="number" min="0" max="24" step="0.25" placeholder="e.g. 3" />
+      </div>
+
+      <div class="card">
+        <h2>Part D · Specifiers</h2>
+        <label class="field">D1. Insight — how true do the feared ideas feel right now?</label>
+        <select id="insight" name="insight">
+          <option value="">Select…</option>
+          <option value="good">Good / fair — I know the fears are excessive or probably not true</option>
+          <option value="poor">Poor — I think the fears might really be true</option>
+          <option value="absent">Absent / delusional — I am convinced the fears are true</option>
+        </select>
+        <label class="field">D2. Tic-related specifier</label>
+        <select id="tics" name="tics">
+          <option value="">Select…</option>
+          <option value="none">No tics</option>
+          <option value="current">Current tics</option>
+          <option value="past">Past tics only</option>
+          <option value="unsure">Not sure</option>
+        </select>
+        <label class="field" for="who">D3. Who gets pulled into rituals or questions?</label>
+        <input id="who" name="who" type="text" />
+        <label class="field" for="howoften">How often per day?</label>
+        <input id="howoften" name="howoften" type="text" />
+        <label class="field" for="how">What do they do? (reassure, wash, check, wait, avoid topics)</label>
+        <input id="how" name="how" type="text" />
+        <label class="field" for="ownwords">D4. In your own words — the main obsession and the main ritual</label>
+        <textarea id="ownwords" name="ownwords"></textarea>
+      </div>
+
+      <div class="actions sticky">
+        <button type="button" id="scoreBtn">Score my answers</button>
+        <button type="button" id="gmailBtn">Open Gmail draft</button>
+        <button type="button" class="secondary" id="copyBtn">Copy summary</button>
+        <button type="button" class="secondary" id="printBtn">Print / save as PDF</button>
+      </div>
+      <p class="hint">Opens a Gmail draft in this browser to office@readywellpsych.com. Then hit Send in Gmail. If a popup is blocked, copy the summary box and paste it into Gmail yourself.</p>
+    </form>
+
+    <div class="card" id="results">
+      <h2>Your results</h2>
+      <div id="resultBody"></div>
+      <label class="field" for="summaryBox">Summary — copy this if Gmail does not open</label>
+      <textarea id="summaryBox" readonly></textarea>
+      <p id="copyStatus"></p>
+      <p class="hint" style="margin-top:.4rem">
+        A high score does not diagnose OCD. A low score does not rule it out.
+        Bring this summary to your clinician. They should still use the Y-BOCS for severity.
+      </p>
+    </div>
+  </main>
+  <footer>
+    FW-OCS · ReadyWell office intake · complement to the Y-BOCS · not a validated diagnostic test
+  </footer>
+
+  <script>
+    // Results go to the ReadyWell office inbox (Yuriy + Faye).
+    const SPRUCE_EMAIL = "office@readywellpsych.com";
+
+    const A = [
+      ["A1", "Contamination — Feeling dirty, contaminated, or at risk of germs/illness, and needing to wash, clean, or stay away from “contaminated” things."],
+      ["A2", "Harm / responsibility — Doubts that I caused or failed to prevent harm, a mistake, or bad luck, and needing to check, undo, or make sure."],
+      ["A3", "Symmetry / “just right” — Needing things even, exact, or complete, or feeling unfinished until I arrange, repeat, or touch something."],
+      ["A4", "Unacceptable thoughts — Unwanted violent, sexual, blasphemous, or “this means I’m a bad person” thoughts that feel unlike me."],
+      ["A5", "Mental rituals — Silently reviewing, counting, praying, replacing a bad thought with a good one, or replaying events in my head to feel safe."],
+      ["A6", "Reassurance — Asking others (or searching/checking my phone) whether something is clean, safe, or whether a thought “means” something."]
+    ];
+    const B = [
+      ["B1", "I avoid people, places, objects, apps, or activities because of these thoughts or rituals."],
+      ["B2", "Someone close to me answers my repeated questions, helps with rituals, or changes plans so I will not get upset."],
+      ["B3", "A physical “not-just-right” feeling (tension, itch, incomplete sensation) drives me to repeat an action until it feels right."],
+      ["B4", "I spend a lot of time checking my phone, messages, photos, videos, or search results to feel sure."],
+      ["B5", "Most of my rituals happen in my head and other people would not see them."],
+      ["B6", "I have current or past tics — sudden movements or sounds I cannot fully control."],
+      ["B7", "These thoughts/rituals feel unwanted and distressing. I wish they would stop."],
+      ["B8", "These habits feel like “just how I am” or the correct way to do things, not like a problem."],
+      ["B9", "My main preoccupation is a flaw in how I look; I check mirrors or seek appearance reassurance."],
+      ["B10", "I cannot discard possessions and living space is hard to use because of clutter."],
+      ["B11", "I pick skin to the point of sores, and it is not mainly to fix how I look."],
+      ["B12", "When I worry, I stew on real-life problems and do not have a ritual I must perform."]
+    ];
+    const C = [
+      ["C1", "On a typical day, how much time is taken by these thoughts and rituals combined?",
+        ["None / rarely", "< 1 hour", "1–3 hours", "3–8 hours", "> 8 hours"]],
+      ["C2", "How much distress do they cause?",
+        ["None", "Mild", "Moderate", "Severe", "Extreme"]],
+      ["C3", "How much do they cause you to avoid people, places, or activities?",
+        ["None", "Occasional", "Some areas", "Many areas", "Housebound / nearly"]],
+      ["C4", "How much do they interfere with work, school, home, or relationships?",
+        ["None", "Slight", "Definite", "Major drop", "Unable to function"]],
+      ["C5", "How much control do you have over them?",
+        ["Full control", "Much", "Moderate", "Little", "None"]]
+    ];
+
+    const partA = document.getElementById("partA");
+    A.forEach(([code, text]) => {
+      partA.insertAdjacentHTML("beforeend", `
+        <div class="item">
+          <p><span class="code">${code}.</span> ${text}</p>
+          <div class="scale">
+            ${[0,1,2,3,4].map(n => `<label><input type="radio" name="${code}" value="${n}" required> ${n}</label>`).join("")}
+          </div>
+        </div>`);
+    });
+    const partB = document.getElementById("partB");
+    B.forEach(([code, text]) => {
+      partB.insertAdjacentHTML("beforeend", `
+        <div class="item">
+          <p><span class="code">${code}.</span> ${text}</p>
+          <div class="yn">
+            <label><input type="radio" name="${code}" value="yes"> Yes</label>
+            <label><input type="radio" name="${code}" value="no"> No</label>
+          </div>
+        </div>`);
+    });
+    const partC = document.getElementById("partC");
+    C.forEach(([code, text, labels]) => {
+      partC.insertAdjacentHTML("beforeend", `
+        <div class="item">
+          <p><span class="code">${code}.</span> ${text}</p>
+          <div class="scale">
+            ${labels.map((lab, n) => `<label><input type="radio" name="${code}" value="${n}"> ${n}<small>${lab}</small></label>`).join("")}
+          </div>
+        </div>`);
+    });
+
+    document.getElementById("date").valueAsDate = new Date();
+
+    function val(name) {
+      const el = document.querySelector(`[name="${name}"]:checked`);
+      return el ? el.value : null;
+    }
+    function num(name) {
+      const v = val(name);
+      return v === null ? null : Number(v);
+    }
+
+    function score() {
+      const _ini = document.getElementById("name").value.trim();
+      if (!_ini) { alert("Please enter your initials."); document.getElementById("name").focus(); return; }
+      const aItems = A.map(([code]) => num(code));
+      if (aItems.some(v => v === null)) {
+        alert("Please answer every Part A item (0–4).");
+        return;
+      }
+      const aTotal = aItems.reduce((s, n) => s + n, 0);
+      const aMax = Math.max(...aItems);
+      const aLabels = ["Contamination", "Harm / responsibility", "Symmetry / just-right", "Unacceptable thoughts", "Mental rituals", "Reassurance"];
+      const theme = aLabels[aItems.indexOf(aMax)];
+
+      const cItems = C.map(([code]) => num(code));
+      const cTotal = cItems.every(v => v !== null) ? cItems.reduce((s, n) => s + n, 0) : null;
+      const hours = document.getElementById("hours").value;
+      const hoursNum = hours === "" ? null : Number(hours);
+
+      const yes = (code) => val(code) === "yes";
+      const flags = [];
+      if (yes("B1") || (num("C3") ?? 0) >= 2) flags.push("Avoidance is prominent — rate it on Y-BOCS-II.");
+      if (yes("B2") || (num("A6") ?? 0) >= 2) flags.push("Reassurance / family accommodation — set a no-reassurance rule.");
+      if (yes("B3")) flags.push("Sensory / “just-right” phenomena — ERP should not be fear-only.");
+      if (yes("B4")) flags.push("Digital checking — include phone/photos in the hierarchy.");
+      if (yes("B5") || (num("A5") ?? 0) >= 2) flags.push("Covert / mental rituals — do not skip response prevention in the head.");
+      if (yes("B6") || document.getElementById("tics").value === "current" || document.getElementById("tics").value === "past")
+        flags.push("Tic-related specifier — document on the DSM diagnosis line.");
+      if (yes("B8") && !yes("B7")) flags.push("Ego-syntonic lean — consider OCPD rather than an OCD-only plan.");
+      if (yes("B9")) flags.push("BDD flag — evaluate appearance preoccupation separately.");
+      if (yes("B10")) flags.push("Hoarding flag — evaluate hoarding disorder separately.");
+      if (yes("B11")) flags.push("Excoriation flag — evaluate skin-picking separately.");
+      if (yes("B12") && aTotal < 8) flags.push("GAD / rumination lean — do not treat as OCD on this screen alone.");
+
+      const insight = document.getElementById("insight").value;
+      if (insight === "poor" || insight === "absent") flags.push("Poor or absent insight — still code as OCD with that specifier, not as primary psychosis.");
+
+      const gatePos = aTotal >= 8 || aMax >= 3 || (hoursNum !== null && hoursNum > 1);
+      const cBand = cTotal === null ? "incomplete" :
+        cTotal <= 7 ? "subclinical (0–7)" :
+        cTotal <= 11 ? "mild (8–11)" :
+        cTotal <= 15 ? "moderate (12–15)" : "severe / extreme (16–20)";
+
+      const name = document.getElementById("name").value.trim() || "(initials missing)";
+      const date = document.getElementById("date").value || "";
+      const visit = document.getElementById("visit").value || "not given";
+      let html = `
+        <div class="score-row"><span>Initials</span><strong>${name}</strong></div>
+        <div class="score-row"><span>Completed</span><strong>${date || "not dated"}</strong></div>
+        <div class="score-row"><span>Next visit</span><strong>${visit}</strong></div>
+        <div class="score-row"><span>Part A total (0–24)</span><strong>${aTotal}</strong></div>
+        <div class="score-row"><span>Highest theme</span><strong>${theme} (${aMax}/4)</strong></div>
+        <div class="score-row"><span>Part C total (0–20)</span><strong>${cTotal === null ? "incomplete" : cTotal + " · " + cBand}</strong></div>
+        <div class="score-row"><span>Hours / typical day</span><strong>${hours === "" ? "not given" : hours}</strong></div>
+        <div class="score-row"><span>Screen</span><strong><span class="pill ${gatePos ? "pos" : "neg"}">${gatePos ? "Positive gate — do Y-BOCS" : "Below gate — clinical judgment still applies"}</span></strong></div>
+        <div class="score-row"><span>Insight</span><strong>${insight || "not marked"}</strong></div>
+        <div class="score-row"><span>Tics</span><strong>${document.getElementById("tics").value || "not marked"}</strong></div>
+      `;
+      if (flags.length) html += `<p style="margin:.8rem 0 .3rem"><strong>Flags</strong></p>` + flags.map(f => `<div class="flag">${f}</div>`).join("");
+      const own = document.getElementById("ownwords").value;
+      if (own) html += `<p style="margin:.8rem 0 0"><strong>Patient words</strong><br>${own.replace(/</g,"&lt;")}</p>`;
+
+      document.getElementById("resultBody").innerHTML = html;
+      document.getElementById("results").classList.add("show");
+
+      window._ocsSummary = [
+        `FW-OCS`,
+        `Initials: ${name}`,
+        `Completed: ${date || "n/a"}`,
+        `Next visit: ${visit}`,
+        `Part A: ${aTotal}/24 · highest theme: ${theme} (${aMax}/4)`,
+        `Part C: ${cTotal === null ? "incomplete" : cTotal + "/20 (" + cBand + ")"}`,
+        `Hours/day: ${hours || "n/a"}`,
+        `Gate: ${gatePos ? "POSITIVE — administer Y-BOCS" : "below gate"}`,
+        `Insight: ${insight || "n/a"} · Tics: ${document.getElementById("tics").value || "n/a"}`,
+        flags.length ? "Flags:\n- " + flags.join("\n- ") : "No extra flags",
+        own ? "Patient words: " + own : ""
+      ].filter(Boolean).join("\n");
+      const box = document.getElementById("summaryBox");
+      if (box) box.value = window._ocsSummary;
+      document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+      return true;
+    }
+
+    function copySummary() {
+      const box = document.getElementById("summaryBox");
+      const status = document.getElementById("copyStatus");
+      if (!window._ocsSummary) {
+        if (!score()) return false;
+      }
+      box.value = window._ocsSummary;
+      box.focus();
+      box.select();
+      box.setSelectionRange(0, box.value.length);
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      if (!ok && navigator.clipboard) {
+        navigator.clipboard.writeText(window._ocsSummary).then(() => {
+          status.textContent = "Summary copied.";
+        }).catch(() => {
+          status.textContent = "Select the box and copy (Ctrl+C or Cmd+C).";
+        });
+        return true;
+      }
+      status.textContent = ok ? "Summary copied." : "Select the box and copy (Ctrl+C or Cmd+C).";
+      return ok;
+    }
+
+    function openGmail() {
+      if (!score()) return;
+      copySummary();
+      const initials = document.getElementById("name").value.trim() || "initials";
+      const visit = document.getElementById("visit").value || "no-visit-date";
+      const subject = "FOR REVIEW : OCS screener";
+      let body = window._ocsSummary;
+      if (body.length > 1500) {
+        body = body.slice(0, 1500) + "\n\n[Gmail cut the rest. Paste the copied summary.]";
+      }
+      const gmail = "https://mail.google.com/mail/?view=cm&fs=1&tf=1"
+        + "&to=" + encodeURIComponent(SPRUCE_EMAIL)
+        + "&su=" + encodeURIComponent(subject)
+        + "&body=" + encodeURIComponent(body);
+      const a = document.createElement("a");
+      a.href = gmail;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      const status = document.getElementById("copyStatus");
+      status.textContent = "Gmail draft should open in a new tab. If it did not, paste the box into Gmail.";
+    }
+
+    document.getElementById("scoreBtn").onclick = score;
+    document.getElementById("gmailBtn").onclick = openGmail;
+    document.getElementById("copyBtn").onclick = copySummary;
+    document.getElementById("printBtn").onclick = () => {
+      if (!window._ocsSummary) score();
+      window.print();
+    };
+  </script>
 </body>
 </html>
