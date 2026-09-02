@@ -1,2 +1,3 @@
-# fw-ocs-screener
-Patient FW-OCS screener. Live host fw-ocs.yuriybortnik.com
+Patient FW-OCS screener.
+Live: https://fw-ocs.yuriybortnik.com
+Do not bind this host to the Wix site.
