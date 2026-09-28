@@ -18,6 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Wire form.css and crest
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          t = p.read_text()
+          t = re.sub(r'<style>.*?</style>', '<link rel="stylesheet" href="form.css" />', t, count=1, flags=re.S)
+          if 'yb-crest.js' not in t:
+              t = t.replace('</body>', '  <script src="yb-crest.js"></script>\n</body>', 1)
+          p.write_text(t)
+          PY
       - uses: actions/configure-pages@v5
         with:
           enablement: true
