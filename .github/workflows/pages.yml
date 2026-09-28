@@ -18,18 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Wire form.css and crest
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p = Path('index.html')
-          t = p.read_text()
-          t = re.sub(r'<style>.*?</style>', '<link rel="stylesheet" href="form.css" />', t, count=1, flags=re.S)
-          if 'yb-crest.js' not in t:
-              t = t.replace('</body>', '  <script src="yb-crest.js"></script>\n</body>', 1)
-          p.write_text(t)
-          PY
+      - name: Wire official YB tab icon
+        run: python3 -c "from pathlib import Path; p=Path('index.html'); t=p.read_text() if p.exists() else ''; s='<link rel=\"icon\" type=\"image/svg+xml\" href=\"https://yuriybortnik.com/favicon.svg\">\n<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"https://yuriybortnik.com/favicon-32.png\">\n<link rel=\"apple-touch-icon\" href=\"https://yuriybortnik.com/apple-touch-icon.png\">\n';
+          p.write_text(t if (not t or 'yuriybortnik.com/favicon' in t) else t.replace('<head>','<head>\n'+s,1)) if t else None"
+      - name: Wire official YB crest
+        run: python3 -c "from pathlib import Path; p=Path('index.html');
+          t=p.read_text() if p.exists() else '';
+          s='<script src=\"yb-crest.js\"></script>';
+          p.write_text(t if (not t or 'yb-crest.js' in t) else t.replace('</body>', s+'</body>', 1)) if t else None"
       - uses: actions/configure-pages@v5
         with:
           enablement: true
