@@ -1,6 +1,5 @@
 (function () {
   var STORE = "fwocs.v1";
-  var EMAIL = "office@readywellpsych.com";
 
   function collect() {
     var data = { fields: {}, radios: {} };
@@ -19,7 +18,7 @@
       if (el) el.value = data.fields[id];
     });
     Object.keys(data.radios || {}).forEach(function (name) {
-      var sel = 'input[type=radio][name="' + name + '"][value="' + String(data.radios[name]).replace(/"/g, '') + '"]';
+      var sel = 'input[type=radio][name="' + name + '"][value="' + String(data.radios[name]).replace(/"/g, "") + '"]';
       var el = document.querySelector(sel);
       if (el) el.checked = true;
     });
@@ -44,43 +43,6 @@
     document.cookie = STORE + "=;max-age=0;path=/;SameSite=Lax";
   }
 
-  async function sendOffice() {
-    var status = document.getElementById("copyStatus");
-    var body = window._ocsSummary || "";
-    if (!body) return;
-    var initials = (document.getElementById("name") && document.getElementById("name").value.trim()) || "initials";
-    var fd = new FormData();
-    fd.append("_subject", "FOR REVIEW : OCS screener");
-    fd.append("_template", "box");
-    fd.append("_captcha", "false");
-    fd.append("_url", "https://fwocs.yuriybortnik.com");
-    fd.append("initials", initials);
-    fd.append("message", body);
-    if (status) status.textContent = "Sending to office@readywellpsych.com\u2026";
-    try {
-      var res = await fetch("https://formsubmit.co/ajax/" + EMAIL, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: fd
-      });
-      var data = await res.json().catch(function () { return {}; });
-      if (String(data.success) === "true") {
-        if (status) status.textContent = "Sent to office@readywellpsych.com.";
-        return;
-      }
-      if (/activat/i.test(String(data.message || ""))) {
-        if (status) status.textContent = "Queued. First send may need one Activate Form click at the office inbox.";
-        return;
-      }
-      throw new Error(data.message || "send failed");
-    } catch (err) {
-      if (status) status.textContent = "Send did not go through. Copy summary is still in the box.";
-    }
-  }
-
-  var gmail = document.getElementById("gmailBtn");
-  if (gmail) gmail.remove();
-
   var actions = document.querySelector(".actions");
   if (actions && !document.getElementById("resetBtn")) {
     var reset = document.createElement("button");
@@ -94,19 +56,6 @@
       location.reload();
     };
     actions.appendChild(reset);
-  }
-
-  var scoreBtn = document.getElementById("scoreBtn");
-  if (scoreBtn) {
-    scoreBtn.textContent = "Score my answers";
-    var prev = scoreBtn.onclick;
-    scoreBtn.onclick = async function () {
-      if (typeof score === "function") score();
-      else if (typeof prev === "function") prev();
-      if (typeof copySummary === "function") copySummary();
-      if (window._ocsSummary) await sendOffice();
-      save();
-    };
   }
 
   load();

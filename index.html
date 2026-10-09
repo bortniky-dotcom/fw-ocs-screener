@@ -318,12 +318,11 @@
       </div>
 
       <div class="actions sticky">
-        <button type="button" id="scoreBtn">Score my answers</button>
-        <button type="button" id="gmailBtn">Open Gmail draft</button>
+        <button type="button" id="scoreBtn">Score and Submit</button>
         <button type="button" class="secondary" id="copyBtn">Copy summary</button>
         <button type="button" class="secondary" id="printBtn">Print / save as PDF</button>
       </div>
-      <p class="hint">Opens a Gmail draft in this browser to office@readywellpsych.com. Then hit Send in Gmail. If a popup is blocked, copy the summary box and paste it into Gmail yourself.</p>
+      <p class="hint">Scores the form, sends a copy to office@readywellpsych.com, and opens a Gmail draft. Copy and Print do not email.</p>
     </form>
 
     <div class="card" id="results">
@@ -532,10 +531,7 @@
     }
 
     function openGmail() {
-      if (!score()) return;
-      copySummary();
-      const initials = document.getElementById("name").value.trim() || "initials";
-      const visit = document.getElementById("visit").value || "no-visit-date";
+      if (!window._ocsSummary) return;
       const subject = "FOR REVIEW : OCS screener";
       let body = window._ocsSummary;
       if (body.length > 1500) {
@@ -552,17 +548,49 @@
       document.body.appendChild(a);
       a.click();
       a.remove();
-      const status = document.getElementById("copyStatus");
-      status.textContent = "Gmail draft should open in a new tab. If it did not, paste the box into Gmail.";
     }
 
-    document.getElementById("scoreBtn").onclick = score;
-    document.getElementById("gmailBtn").onclick = openGmail;
+    function sendOffice() {
+      if (!window._ocsSummary) return;
+      if (window._sentOffice) return;
+      const initials = document.getElementById("name").value.trim() || "";
+      const status = document.getElementById("copyStatus");
+      fetch("https://formsubmit.co/ajax/" + SPRUCE_EMAIL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          _subject: "FOR REVIEW : OCS screener",
+          _template: "box",
+          _captcha: "false",
+          _url: "https://fwocs.yuriybortnik.com",
+          initials: initials,
+          message: window._ocsSummary
+        })
+      }).then(r => r.json()).then(d => {
+        window._sentOffice = true;
+        if (d && (d.success === true || d.success === "true")) {
+          status.textContent = "Office copy sent. Gmail draft should also be open.";
+        } else {
+          status.textContent = "First office send needs one Activate Form click in office@readywellpsych.com. Then Score and Submit again. Copy is the backup.";
+        }
+      }).catch(() => {
+        status.textContent = "Office send did not go through. Use the copied summary in the Gmail draft.";
+      });
+    }
+
+    function scoreAndSubmit() {
+      if (!score()) return;
+      openGmail();
+      sendOffice();
+    }
+
+    document.getElementById("scoreBtn").onclick = scoreAndSubmit;
     document.getElementById("copyBtn").onclick = copySummary;
     document.getElementById("printBtn").onclick = () => {
       if (!window._ocsSummary) score();
       window.print();
     };
   </script>
+  <script src="persist-send.js"></script>
 </body>
 </html>
