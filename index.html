@@ -451,8 +451,6 @@
       const ticsVal = document.getElementById("tics").value;
       if (ticsVal === "current" || ticsVal === "past")
         flags.push("Tic-related specifier: document on the DSM diagnosis line.");
-      else if (yes("B6"))
-        flags.push("Tics endorsed on B6 but not confirmed on D2: confirm tics at the visit.");
       if (yes("B8") && !yes("B7")) flags.push("Ego-syntonic lean — consider OCPD rather than an OCD-only plan.");
       if (yes("B9")) flags.push("BDD flag — evaluate appearance preoccupation separately.");
       if (yes("B10")) flags.push("Hoarding flag — evaluate hoarding disorder separately.");
@@ -472,6 +470,14 @@
         panelRead === "borderline" ? "Screen borderline: clinician judgment, Y-BOCS optional" :
         "Screen negative: no action unless clinical concern";
       if (flags.length >= 7 && (cTotal === null || cTotal < 12)) flags.push("Many endorsements: confirm at interview.");
+      const followUps = [];
+      const bBlank = B.map(([code]) => code).filter(code => val(code) === null);
+      if (bBlank.length) followUps.push("Follow up, not scored: no yes or no on " + bBlank.join(", ") + ".");
+      if (ticsVal === "unsure" || ticsVal === "") followUps.push("Follow up, not scored: tics " + (ticsVal === "unsure" ? "marked not sure" : "not answered") + " on D2" + (yes("B6") ? " (B6 was yes)" : "") + ". Confirm at the visit.");
+      const cBlank = C.map(([code]) => code).filter(code => val(code) === null);
+      if (cBlank.length) followUps.push("Follow up, not scored: " + cBlank.join(", ") + " left blank.");
+      if (!insight) followUps.push("Follow up, not scored: insight (D1) not answered.");
+      flags.push(...followUps);
       const cBand = cTotal === null ? "incomplete" :
         cTotal <= 7 ? "subclinical (0–7)" :
         cTotal <= 11 ? "mild (8–11)" :
