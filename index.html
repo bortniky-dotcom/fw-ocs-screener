@@ -322,13 +322,13 @@
         <button type="button" class="secondary" id="copyBtn">Copy summary</button>
         <button type="button" class="secondary" id="printBtn">Print / save as PDF</button>
       </div>
-      <p class="hint">Scores the form, sends a copy to office@readywellpsych.com, and opens a Gmail draft. Copy and Print do not email.</p>
+      <p class="hint">Scores the form and sends your answers to the office once. Copy and Print do not email.</p>
     </form>
 
     <div class="card" id="results">
       <h2>Your results</h2>
       <div id="resultBody"></div>
-      <label class="field" for="summaryBox">Summary — copy this if Gmail does not open</label>
+      <label class="field" for="summaryBox">Summary</label>
       <textarea id="summaryBox" readonly></textarea>
       <p id="copyStatus"></p>
       <p class="hint" style="margin-top:.4rem">
@@ -530,31 +530,43 @@
       return ok;
     }
 
-    function openGmail() {
-      if (!window._ocsSummary) return;
-      const subject = "FOR REVIEW : OCS screener";
-      let body = window._ocsSummary;
-      if (body.length > 1500) {
-        body = body.slice(0, 1500) + "\n\n[Gmail cut the rest. Paste the copied summary.]";
+    var SENT_KEY = "fwocs.v1.sent";
+    function isSent() {
+      try { if (localStorage.getItem(SENT_KEY) === "1") return true; } catch (e) {}
+      return document.cookie.split("; ").some(function (p) { return p === SENT_KEY + "=1"; });
+    }
+    function markSent() {
+      try { localStorage.setItem(SENT_KEY, "1"); } catch (e) {}
+      document.cookie = SENT_KEY + "=1;max-age=" + (60 * 60 * 24 * 14) + ";path=/;SameSite=Lax";
+    }
+    function showThanks() {
+      var btn = document.getElementById("scoreBtn");
+      btn.disabled = true;
+      btn.style.display = "none";
+      var t = document.getElementById("thanksBox");
+      if (!t) {
+        t = document.createElement("div");
+        t.id = "thanksBox";
+        t.setAttribute("role", "status");
+        t.style.cssText = "margin:16px 0;padding:20px;border:2px solid #2e7d32;border-radius:12px;background:#eef7ee;font-size:18px;line-height:1.5;";
+        t.innerHTML = "<strong>Thank you.</strong> Your answers were sent to the office. You can close this page.";
+        var actions = document.querySelector(".actions");
+        actions.parentNode.insertBefore(t, actions);
       }
-      const gmail = "https://mail.google.com/mail/?view=cm&fs=1&tf=1"
-        + "&to=" + encodeURIComponent(SPRUCE_EMAIL)
-        + "&su=" + encodeURIComponent(subject)
-        + "&body=" + encodeURIComponent(body);
-      const a = document.createElement("a");
-      a.href = gmail;
-      a.target = "_blank";
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      var status = document.getElementById("copyStatus");
+      if (status) status.textContent = "";
     }
 
+    var sending = false;
     function sendOffice() {
-      if (!window._ocsSummary) return;
-      if (window._sentOffice) return;
+      if (!window._ocsSummary || sending || isSent()) return;
+      sending = true;
+      const btn = document.getElementById("scoreBtn");
       const initials = document.getElementById("name").value.trim() || "";
       const status = document.getElementById("copyStatus");
+      btn.disabled = true;
+      btn.textContent = "Sending\u2026";
+      status.textContent = "";
       fetch("https://formsubmit.co/ajax/" + SPRUCE_EMAIL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -567,22 +579,27 @@
           message: window._ocsSummary
         })
       }).then(r => r.json()).then(d => {
-        window._sentOffice = true;
         if (d && (d.success === true || d.success === "true")) {
-          status.textContent = "Office copy sent. Gmail draft should also be open.";
+          markSent();
+          showThanks();
         } else {
-          status.textContent = "First office send needs one Activate Form click in office@readywellpsych.com. Then Score and Submit again. Copy is the backup.";
+          throw new Error("not sent");
         }
       }).catch(() => {
-        status.textContent = "Office send did not go through. Use the copied summary in the Gmail draft.";
+        sending = false;
+        btn.disabled = false;
+        btn.textContent = "Retry sending";
+        status.textContent = "Your answers did not send. Please check your connection and press Retry sending.";
       });
     }
 
     function scoreAndSubmit() {
+      if (isSent()) { showThanks(); return; }
       if (!score()) return;
-      openGmail();
       sendOffice();
     }
+
+    if (isSent()) showThanks();
 
     document.getElementById("scoreBtn").onclick = scoreAndSubmit;
     document.getElementById("copyBtn").onclick = copySummary;

@@ -41,6 +41,8 @@
   function clearStore() {
     try { localStorage.removeItem(STORE); } catch (e) {}
     document.cookie = STORE + "=;max-age=0;path=/;SameSite=Lax";
+    try { localStorage.removeItem(STORE + ".sent"); } catch (e) {}
+    document.cookie = STORE + ".sent=;max-age=0;path=/;SameSite=Lax";
   }
 
   var actions = document.querySelector(".actions");
