@@ -434,7 +434,7 @@
       const aTotal = aItems.reduce((s, n) => s + n, 0);
       const aMax = Math.max(...aItems);
       const aLabels = ["Contamination", "Harm / responsibility", "Symmetry / just-right", "Unacceptable thoughts", "Mental rituals", "Reassurance"];
-      const theme = aLabels[aItems.indexOf(aMax)];
+      const theme = aLabels.filter((l, i) => aItems[i] === aMax).join(", ");
 
       const cItems = C.map(([code]) => num(code));
       const cTotal = cItems.every(v => v !== null) ? cItems.reduce((s, n) => s + n, 0) : null;
@@ -448,8 +448,11 @@
       if (yes("B3")) flags.push("Sensory / “just-right” phenomena — ERP should not be fear-only.");
       if (yes("B4")) flags.push("Digital checking — include phone/photos in the hierarchy.");
       if (yes("B5") || (num("A5") ?? 0) >= 2) flags.push("Covert / mental rituals — do not skip response prevention in the head.");
-      if (yes("B6") || document.getElementById("tics").value === "current" || document.getElementById("tics").value === "past")
-        flags.push("Tic-related specifier — document on the DSM diagnosis line.");
+      const ticsVal = document.getElementById("tics").value;
+      if (ticsVal === "current" || ticsVal === "past")
+        flags.push("Tic-related specifier: document on the DSM diagnosis line.");
+      else if (yes("B6"))
+        flags.push("Tics endorsed on B6 but not confirmed on D2: confirm tics at the visit.");
       if (yes("B8") && !yes("B7")) flags.push("Ego-syntonic lean — consider OCPD rather than an OCD-only plan.");
       if (yes("B9")) flags.push("BDD flag — evaluate appearance preoccupation separately.");
       if (yes("B10")) flags.push("Hoarding flag — evaluate hoarding disorder separately.");
@@ -457,9 +460,18 @@
       if (yes("B12") && aTotal < 8) flags.push("GAD / rumination lean — do not treat as OCD on this screen alone.");
 
       const insight = document.getElementById("insight").value;
-      if (insight === "poor" || insight === "absent") flags.push("Poor or absent insight — still code as OCD with that specifier, not as primary psychosis.");
+      if (insight === "absent") flags.push("Absent insight: still code as OCD with that specifier, not as primary psychosis.");
+      else if (insight === "poor") flags.push("Poor insight: note the insight specifier and review at the visit.");
 
       const gatePos = aTotal >= 8 || aMax >= 3 || (hoursNum !== null && hoursNum > 1);
+      const c1 = num("C1");
+      const panelA = aTotal >= 10 || aMax >= 4;
+      const panelC = (cTotal !== null && cTotal >= 8) || (hoursNum !== null && hoursNum > 1) || (c1 !== null && c1 >= 2);
+      const panelRead = !gatePos ? "negative" : (panelA && panelC ? "positive" : "borderline");
+      const panelText = panelRead === "positive" ? "Screen positive: needs Y-BOCS" :
+        panelRead === "borderline" ? "Screen borderline: clinician judgment, Y-BOCS optional" :
+        "Screen negative: no action unless clinical concern";
+      if (flags.length >= 7 && (cTotal === null || cTotal < 12)) flags.push("Many endorsements: confirm at interview.");
       const cBand = cTotal === null ? "incomplete" :
         cTotal <= 7 ? "subclinical (0–7)" :
         cTotal <= 11 ? "mild (8–11)" :
@@ -473,10 +485,10 @@
         <div class="score-row"><span>Completed</span><strong>${date || "not dated"}</strong></div>
         <div class="score-row"><span>Next visit</span><strong>${visit}</strong></div>
         <div class="score-row"><span>Part A total (0–24)</span><strong>${aTotal}</strong></div>
-        <div class="score-row"><span>Highest theme</span><strong>${theme} (${aMax}/4)</strong></div>
+        <div class="score-row"><span>Highest theme${theme.includes(",") ? "s (tied)" : ""}</span><strong>${theme} (${aMax}/4)</strong></div>
         <div class="score-row"><span>Part C total (0–20)</span><strong>${cTotal === null ? "incomplete" : cTotal + " · " + cBand}</strong></div>
         <div class="score-row"><span>Hours / typical day</span><strong>${hours === "" ? "not given" : hours}</strong></div>
-        <div class="score-row"><span>Screen</span><strong><span class="pill ${gatePos ? "pos" : "neg"}">${gatePos ? "Positive gate — do Y-BOCS" : "Below gate — clinical judgment still applies"}</span></strong></div>
+        <div class="score-row"><span>Screen</span><strong><span class="pill ${panelRead === "positive" ? "pos" : "neg"}">${panelText}</span></strong></div>
         <div class="score-row"><span>Insight</span><strong>${insight || "not marked"}</strong></div>
         <div class="score-row"><span>Tics</span><strong>${document.getElementById("tics").value || "not marked"}</strong></div>
       `;
@@ -492,14 +504,24 @@
         `Initials: ${name}`,
         `Completed: ${date || "n/a"}`,
         `Next visit: ${visit}`,
-        `Part A: ${aTotal}/24 · highest theme: ${theme} (${aMax}/4)`,
+        `Part A: ${aTotal}/24 · highest theme(s): ${theme} (${aMax}/4)`,
         `Part C: ${cTotal === null ? "incomplete" : cTotal + "/20 (" + cBand + ")"}`,
         `Hours/day: ${hours || "n/a"}`,
-        `Gate: ${gatePos ? "POSITIVE — administer Y-BOCS" : "below gate"}`,
+        `Form gate: ${gatePos ? "POSITIVE" : "below gate"}`,
+        `Panel read: ${panelText}`,
         `Insight: ${insight || "n/a"} · Tics: ${document.getElementById("tics").value || "n/a"}`,
         flags.length ? "Flags:\n- " + flags.join("\n- ") : "No extra flags",
         own ? "Patient words: " + own : ""
       ].filter(Boolean).join("\n");
+      const ans = {};
+      A.forEach(([c]) => { ans[c] = val(c) ?? ""; });
+      B.forEach(([c]) => { ans[c] = val(c) ?? ""; });
+      C.forEach(([c]) => { ans[c] = val(c) ?? ""; });
+      ans.hours = hours; ans.D1_insight = insight; ans.D2_tics = ticsVal;
+      ["who", "howoften", "how", "ownwords"].forEach(id => { ans["D_" + id] = document.getElementById(id).value; });
+      ans.date = date; ans.next_visit = visit;
+      ans.form_gate = gatePos ? "positive" : "negative"; ans.panel_read = panelRead;
+      window._ocsAnswers = ans;
       const box = document.getElementById("summaryBox");
       if (box) box.value = window._ocsSummary;
       document.getElementById("results").scrollIntoView({ behavior: "smooth" });
@@ -576,7 +598,9 @@
           _captcha: "false",
           _url: "https://fwocs.yuriybortnik.com",
           initials: initials,
-          message: window._ocsSummary
+          message: window._ocsSummary,
+          answers: Object.keys(window._ocsAnswers || {}).map(k => k + ": " + window._ocsAnswers[k]).join("\n"),
+          ...(window._ocsAnswers || {})
         })
       }).then(r => r.json()).then(d => {
         if (d && (d.success === true || d.success === "true")) {
